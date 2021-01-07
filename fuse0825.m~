@@ -5,7 +5,6 @@ function [finalEst, relScore] = fuse0825(estimates)
     [numChannels, numSegs] = size(estimates);
     
     finalEst = NaN(1, numSegs);
-    relScore = NaN(numChannels, numSegs);
     
     consistencyScr = NaN(numChannels, numSegs);
     valScr = NaN(numChannels, numSegs);
@@ -26,8 +25,6 @@ function [finalEst, relScore] = fuse0825(estimates)
             end
         end
     end
-    
-    relScore = consistencyScr .* valScr;
     
     for i = 1:numSegs
         repeatVals = NaN(1, numChannels*10);

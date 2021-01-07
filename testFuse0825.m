@@ -50,13 +50,14 @@ for id = 1:20
     for sensor = 1:3
         pdSpecEst(sensor+3,:) = peakDetectionSliding(dsCoil(sensor,:), phaseStartIdces, dsSegCuts);
     end
-    fuseEst = fuse0825(pdSpecEst);
+    [fuseEst, relScores] = fuse0825(pdSpecEst);
     
     allEstimates(id).numSegs = numSegs;
     allEstimates(id).refEst = refEst;
     allEstimates(id).fuseRef = fuseRefEst;
     allEstimates(id).pdSpecEst = pdSpecEst;
     allEstimates(id).fuseEst = fuseEst;
+    allEstimates(id).pdSpecRelScr = relScores;
     toc
 end
 
@@ -99,5 +100,5 @@ figure(fig)
 % blandAltman(allRefEst, allFuseEst, allRelScr)
 
 blandAltman(allFuseRef, allFuseEst)
-title("Mean Fusion Peak Detection and Spectral Approach -- All Patients")
-set(gca, "FontSize", 16)
+title("Respiratory Rate Post Fusion Estimation with MI Sensors")
+set(gca, "FontSize", 20)
