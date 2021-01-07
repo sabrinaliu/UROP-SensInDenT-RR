@@ -1,4 +1,4 @@
-function finEst = peakDetectionSliding(inputData, phaseStartIdces, segCuts, fs)
+function [finEst, relScr] = peakDetectionSliding(inputData, phaseStartIdces, segCuts, fs)
     % Given all the inputData from a channel,
     % phaseStartIdces that mark where new phases begin,
     % segCuts that mark where each estimation window begins
@@ -12,6 +12,7 @@ function finEst = peakDetectionSliding(inputData, phaseStartIdces, segCuts, fs)
     numSegs = numel(segCuts) - 1;
     numSamples = numel(inputData);
     finEst = NaN(1, numSegs);
+    relScr = NaN(1, numSegs);
     
     currPhaseStartIdx = 1;
     start = 1;
@@ -40,5 +41,6 @@ function finEst = peakDetectionSliding(inputData, phaseStartIdces, segCuts, fs)
     for i = 1:numSegs
         currRange = (segCuts(i):segCuts(i+1)-1);
         finEst(i) = mean(unmergeEst(currRange), "omitnan");
+        relScr(i) = max(0, min(1, 1 - (std(unmergeEst(currRange), "omitnan")-1)/4));
     end
 end

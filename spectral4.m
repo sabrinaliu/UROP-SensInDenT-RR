@@ -53,7 +53,7 @@ function [finalBpmEst, relScore] = spectral4(inputData, filterOutStd, isPlot)
     end
     
     if ~filterOutStd || std(bpmEstimates, "omitnan") < 4
-        relScore = std(bpmEstimates, "omitnan");
+        relScore = max(0, min(1, 1 - (std(bpmEstimates, "omitnan")-1)/3));
         finalBpmEst = mean(bpmEstimates, "omitnan");
     end
     

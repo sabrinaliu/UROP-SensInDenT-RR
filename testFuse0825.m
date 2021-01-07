@@ -33,31 +33,35 @@ for id = 1:20
     dsNumSegs = numel(dsSegCuts);
 
     refEst = NaN(2, numSegs);
+    refRelScr = NaN(2, numSegs);
     for i = 1:numSegs
         currRange = (segCuts(i):segCuts(i+1)-1);
-        refEst(1, i) = spectral4(resp(currRange), false);
+        [refEst(1, i), refRelScr(1, i)] = spectral4(resp(currRange), false);
     end
-    refEst(2,:) = peakDetectionSliding(dsResp, phaseStartIdces, dsSegCuts);
-    fuseRefEst = fuse0825(refEst);
+    [refEst(2,:), refRelScr(2,:)] = peakDetectionSliding(dsResp, phaseStartIdces, dsSegCuts);
+    fuseRefEst = fuse0825(refEst, refRelScr);
     
     pdSpecEst = NaN(6, numSegs);
+    pdSpecRelScr = NaN(6, numSegs);
     for i = 1:numSegs
         currRange = (segCuts(i):segCuts(i+1)-1);
         for sensor = 1:3
-            pdSpecEst(sensor, i) = spectral4(coil(sensor, currRange));
+            [pdSpecEst(sensor, i), pdSpecRelScr(sensor, i)] = spectral4(coil(sensor, currRange));
         end
     end
     for sensor = 1:3
-        pdSpecEst(sensor+3,:) = peakDetectionSliding(dsCoil(sensor,:), phaseStartIdces, dsSegCuts);
+        [pdSpecEst(sensor+3,:), pdSpecRelScr(sensor+3,:)] = peakDetectionSliding(dsCoil(sensor,:), phaseStartIdces, dsSegCuts);
     end
-    [fuseEst, relScores] = fuse0825(pdSpecEst);
+    [fuseEst, relScores] = fuse0825(pdSpecEst, pdSpecRelScr);
     
     allEstimates(id).numSegs = numSegs;
     allEstimates(id).refEst = refEst;
+    allEstimates(id).refRelScr = refRelScr;
     allEstimates(id).fuseRef = fuseRefEst;
     allEstimates(id).pdSpecEst = pdSpecEst;
+    allEstimates(id).pdSpecRelScr = pdSpecRelScr;
     allEstimates(id).fuseEst = fuseEst;
-    allEstimates(id).pdSpecRelScr = relScores;
+    allEstimates(id).relScores = relScores;
     toc
 end
 
