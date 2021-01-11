@@ -47,7 +47,7 @@ figure(fig)
 for phase = 1:4
     ax(phase) = subplot(2, 2, phase);
     blandAltman(byPhase(phase).ref, byPhase(phase).est)
-    title("Respiratory Rate Post Fusion Estimation with MI Sensors Phase " + num2str(phase))
+    title("Respiratory Rate Post Fusion Estimation with RPPG Sensors Phase " + num2str(phase))
     set(gca, "FontSize", 16)
 end
 linkaxes(ax)
