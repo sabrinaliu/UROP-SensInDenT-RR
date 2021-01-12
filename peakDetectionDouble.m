@@ -11,14 +11,8 @@ function [bpmEst, relScore, pkIdces] = peakDetectionDouble(unfilteredData, fs)
         return
     end
     
-    filteredData = removeArtifactsRef(unfilteredData, fs);
+    filteredData = removeArtifacts(unfilteredData, fs);
     
-%     corrData = unfilteredData - movmean(unfilteredData, fs*10);
-%     [~, intervalStart, intervalEnd, relScore] = corrSliding(corrData);
-%     if isnan(intervalStart)
-%         intervalStart = 1;
-%         intervalEnd = numel(unfilteredData);
-%     end
     intervalStart = 1;
     intervalEnd = numel(unfilteredData);
     

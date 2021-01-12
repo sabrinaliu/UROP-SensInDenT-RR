@@ -1,4 +1,6 @@
-function finalData = removeArtifactsRef(inputData, fs)
+function finalData = removeArtifacts(inputData, fs)
+    % Removes sharp spikes, smooths, filters the data from one channel of
+    
     if nargin < 2
         fs = 250;
     end

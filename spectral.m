@@ -1,4 +1,4 @@
-function [finalBpmEst, relScore] = spectral4(inputData, filterOutStd, isPlot)
+function [finalBpmEst, relScore] = spectral(inputData, filterOutStd, isPlot)
     % inputData represents 1 channel of data
     finalBpmEst = NaN;
     relScore = NaN;

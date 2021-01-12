@@ -1,9 +1,9 @@
 % addpath('/Users/sabrinaliu/SuperUROP/matLabFiles/util')
-% 
-% allEstimatesOverlap = struct;
-% allCoverageOverlap = NaN(20, 3); % number for ref, est, both
-% allNumSegsOverlap = NaN(20, 1);
-% allNumRightOverlap = NaN(20, 2); % num fused right, num possibly right
+
+allEstimatesOverlap = struct;
+allCoverageOverlap = NaN(20, 3); % number for ref, est, both
+allNumSegsOverlap = NaN(20, 1);
+allNumRightOverlap = NaN(20, 2); % num fused right, num possibly right
 
 fs = 250;
 dsFs = 5;
@@ -37,19 +37,19 @@ for id = idRange
     refRelScr = NaN(2, numSegs);
     for i = 1:numSegs
         currRange = (segCuts(1, i):segCuts(2, i));
-        [refEst(1, i), refRelScr(1, i)] = spectral4(resp(currRange), false);
+        [refEst(1, i), refRelScr(1, i)] = spectral(resp(currRange), false);
     end
      [currRefEst, currRelScr] = overlapPeakDetectionSliding(dsResp, phaseStartIdces, dsSegCuts);
      refEst(2,1:numel(currRefEst)) = currRefEst; 
      refRelScr(2,1:numel(currRefEst)) = currRelScr;
-    fuseRefEst = fuse0825(refEst, refRelScr);
+    fuseRefEst = fuseRelScoreRR(refEst, refRelScr);
     
     pdSpecEst = NaN(6, numSegs);
     pdSpecRelScr = NaN(6, numSegs);
     for i = 1:numSegs
         currRange = (segCuts(i):segCuts(2, i));
         for sensor = 1:3
-            [pdSpecEst(sensor, i), pdSpecRelScr(sensor, i)] = spectral4(coil(sensor, currRange));
+            [pdSpecEst(sensor, i), pdSpecRelScr(sensor, i)] = spectral(coil(sensor, currRange));
         end
     end
     for sensor = 1:3
@@ -57,7 +57,7 @@ for id = idRange
          pdSpecEst(sensor+3,1:numel(currPdEst)) = currPdEst;
          pdSpecRelScr(sensor+3,1:numel(currPdEst)) = currPdRelScr;
     end
-    fuseEst = fuse0825(pdSpecEst, pdSpecRelScr);
+    fuseEst = fuseRelScoreRR(pdSpecEst, pdSpecRelScr);
     
     allEstimatesOverlap(id).numSegs = numSegs;
     allEstimatesOverlap(id).refEst = refEst;

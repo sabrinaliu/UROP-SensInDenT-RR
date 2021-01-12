@@ -1,4 +1,4 @@
-function [finalEst, relScore] = fuse0825(estimates, sigQualScr)
+function [finalEst, relScore] = fuseRelScoreRR(estimates, sigQualScr)
     % Given mxn array estimates where m is the number of
     % channels/estimators and n is the number of segments
     % Return a 1xn array of fused estimates

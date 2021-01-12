@@ -11,7 +11,7 @@ for id = 1:20
     currFm = permute(currPpg(:, 2, :), [1, 3, 2]);
     currBw = permute(currPpg(:, 3, :), [1, 3, 2]);
     
-    [finalEst, relScore] = fuse0825([currAm; currFm; currBw], ones(9, numSamps));
+    [finalEst, relScore] = fuseRelScoreRR([currAm; currFm; currBw], ones(9, numSamps));
     
     allEstimates(id).amFmBw = [currAm; currFm; currBw];
     allEstimates(id).fuseEst = finalEst;
