@@ -1,4 +1,4 @@
-addpath('/Users/sabrinaliu/SuperUROP/matLabFiles/util')
+addpath('/Users/sabrinaliu/SuperUROP/matLabFiles/respiratoryRate/finalCode/util')
 
 allEstimates = struct;
 allCoverage = NaN(20, 3); % number for ref, est, both

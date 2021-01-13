@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream:spectral.m
 function [finalBpmEst, relScore] = spectral(inputData, filterOutStd, isPlot)
-    % inputData represents 1 channel of data
-=======
-function [finalBpmEst, relScore] = spectral4(inputData, filterOutStd, isPlot)
     % Given data from one segment, use spectral approach to estimate
     % respiratory rate
     % Input:
@@ -16,7 +12,6 @@ function [finalBpmEst, relScore] = spectral4(inputData, filterOutStd, isPlot)
     %   relScore: float that is the reliability score of the returned
     %   estimate
     
->>>>>>> Stashed changes:spectral4.m
     finalBpmEst = NaN;
     relScore = NaN;
     
