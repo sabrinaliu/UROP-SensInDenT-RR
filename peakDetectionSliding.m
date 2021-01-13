@@ -1,9 +1,18 @@
 function [finEst, relScr] = peakDetectionSliding(inputData, phaseStartIdces, segCuts, fs)
-    % Given all the inputData from a channel,
-    % phaseStartIdces that mark where new phases begin,
-    % segCuts that mark where each estimation window begins
-    % Return a finEst, 1xnumel(segCuts) array that contains the RR estimate
-    % for each estimation window
+    % Calculate respiratory rate estimate for all of 30s segments in a
+    % given inputData
+    % Input:
+    %   inputData: float vector of unfiltered data from a single channel
+    %   phaseStartIdces: integer vector of indices where new
+    %   phase in the dental procedure starts
+    %   segCuts: integer vector of where the 30s segments start, including
+    %   where the phases start
+    %   fs: float storing the sampling rate
+    % Output:
+    %   finEst: 1xnumel(segCuts)-1 float vector of the respiratory rate
+    %   estimate of each segment
+    %   relScr: 1xnumel(segCuts)-1 float vector of the signal quality score
+    %   corresponding to each estimate
     
     if nargin < 4
         fs = 5;
@@ -17,9 +26,12 @@ function [finEst, relScr] = peakDetectionSliding(inputData, phaseStartIdces, seg
     currPhaseStartIdx = 1;
     start = 1;
     
+    % Start Sliding window of 30s, overlap of 5s
+    % In each window, apply peakDetectionDouble to get an estimate
     unmergeEst = NaN(1, numSamples);
     while start < numSamples
         stop = start + fs*30 - 1; % 30s windows
+        % Prevent windows from including samples from multiple phases
         if stop > numSamples
             stop = numSamples;
         elseif stop >= phaseStartIdces(currPhaseStartIdx)
@@ -31,6 +43,8 @@ function [finEst, relScr] = peakDetectionSliding(inputData, phaseStartIdces, seg
         
         unmergeEst(start) = peakDetectionDouble(inputData(currRange), fs);
         
+        % If current window <20s, then close enough to end don't need new
+        % window
         if stop - start < 20*fs
             start = stop+1;
         else
@@ -38,6 +52,9 @@ function [finEst, relScr] = peakDetectionSliding(inputData, phaseStartIdces, seg
         end
     end
     
+    % For each of the nonoverlapping 30s segments, find its estimate by
+    % averaging all the sliding window estimates that overlap with this
+    % segment
     for i = 1:numSegs
         currRange = (segCuts(i):segCuts(i+1)-1);
         finEst(i) = mean(unmergeEst(currRange), "omitnan");

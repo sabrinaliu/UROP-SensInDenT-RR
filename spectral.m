@@ -1,5 +1,22 @@
+<<<<<<< Updated upstream:spectral.m
 function [finalBpmEst, relScore] = spectral(inputData, filterOutStd, isPlot)
     % inputData represents 1 channel of data
+=======
+function [finalBpmEst, relScore] = spectral4(inputData, filterOutStd, isPlot)
+    % Given data from one segment, use spectral approach to estimate
+    % respiratory rate
+    % Input:
+    %   inputData: 1xn float vector that includes data from one segment
+    %   filterOutStd: boolean whether should omit estimates with high
+    %   variation
+    %   isPlot: boolean if should plot results
+    % Output:
+    %   finalBpmEst: float that is the estimate of current respiratory rate
+    %   in brpm
+    %   relScore: float that is the reliability score of the returned
+    %   estimate
+    
+>>>>>>> Stashed changes:spectral4.m
     finalBpmEst = NaN;
     relScore = NaN;
     
@@ -56,64 +73,6 @@ function [finalBpmEst, relScore] = spectral(inputData, filterOutStd, isPlot)
         relScore = max(0, min(1, 1 - (std(bpmEstimates, "omitnan")-1)/3));
         finalBpmEst = mean(bpmEstimates, "omitnan");
     end
-    
-%     potentialEstimates = [];
-%     for i = 1:numel(winLengths)
-%         if winLengths(i) > numSamples
-%             continue
-%         end
-%         pxx = allSpectra(i).pxx;
-%         bpm = allSpectra(i).bpm;
-%         
-%         [pkVals, pkBpms] = findpeaks(pxx, bpm, "SortStr", "descend");
-%         
-%         if numel(pkVals) < 1
-%             continue
-%         end
-%         
-%         if numel(potentialEstimates) == 0
-%             potentialEstimates = [pkBpms pkVals ones(numel(pkBpms), 1)];
-%             continue
-%         end
-%         
-%         for j = 1:numel(pkBpms)
-%             [bestDiff, bestMatchIdx] = min(abs(pkBpms(j) - potentialEstimates(:,1)));
-%             
-%             if bestDiff < 1
-%                 potentialEstimates(bestMatchIdx, 3) = potentialEstimates(bestMatchIdx, 3) + 1;
-%             else
-%                 potentialEstimates = [potentialEstimates; [pkBpms(j) pkVals(j) 1]];
-%             end
-%         end
-%         
-% %         bpmEstimates(i) = pkBpms(1);
-%     end
-    
-%     if numel(potentialEstimates) == 0
-%         return
-%     end
-%     mostMatches = max(potentialEstimates(:,3));
-%     if mostMatches < 2
-%         return
-%     end
-%     
-%     goodBpms = potentialEstimates(potentialEstimates(:,3) == mostMatches, 1:2);
-%     if numel(goodBpms) == 1
-%         finalBpmEst = goodBpms;
-%         return
-%     end
-%     
-%     [~, order] = sort(goodBpms(:,2));
-%     goodBpms = goodBpms(order, :);
-%     chosenIdx = 1;
-%     for i = 2:numel(order)
-%         if goodBpms(i, 1) < goodBpms(chosenIdx, 1) && goodBpms(i, 2) > .9 * goodBpms(chosenIdx, 2)
-%             chosenIdx = i;
-%         end
-%     end
-    
-%     finalBpmEst = mean(bpmEstimates, "omitnan");
-%     finalBpmEst = goodBpms(chosenIdx, 1);
     
     if isPlot
         fig = 5;

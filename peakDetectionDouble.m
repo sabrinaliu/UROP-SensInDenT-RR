@@ -1,4 +1,16 @@
 function [bpmEst, relScore, pkIdces] = peakDetectionDouble(unfilteredData, fs)
+    % Subroutine used by peakDetectionSliding
+    % Applies peak detection to signal filtered 2 different ways (using
+    % bandpass filter and using median filter) and compares the two to
+    % remove extraneous peaks
+    % Input:
+    %   unfilteredData: 1xn float vector of unfiltered data from a window
+    %   fs: float for the sampling rate
+    % Output:
+    %   bpmEst: float for the respiratory rate estimate for this window
+    %   relScore: float for the signal quality score for that estimate
+    %   pkIdces: float vector with indices of the peaks identified
+    
     bpmEst = NaN;
     relScore = NaN;
     pkIdces = [];
@@ -11,25 +23,24 @@ function [bpmEst, relScore, pkIdces] = peakDetectionDouble(unfilteredData, fs)
         return
     end
     
-    filteredData = removeArtifacts(unfilteredData, fs);
-    
-    intervalStart = 1;
-    intervalEnd = numel(unfilteredData);
-    
-    shortenedFilteredData = filteredData(intervalStart:intervalEnd);
-    shortenedUnfilteredData = unfilteredData(intervalStart:intervalEnd);
+    filteredData = removeArtifacts(unfilteredData, fs); % normal filtering with bandmass
 
-    [bpPks, bpPkIdces] = findpeaks(shortenedFilteredData);
-    [medPks, medPkIdces] = medianFilterPeaks(shortenedUnfilteredData, fs);
+    [bpPks, bpPkIdces] = findpeaks(filteredData);
+    [medPks, medPkIdces] = medianFilterPeaks(unfilteredData, fs); % filtering with median
     
+    % Use median peaks to cross check if the bandpass peaks are extraneous
+    % or not
     pkMatches = nan(1, numel(bpPkIdces));
     for i = 1:numel(bpPkIdces)
         [matchDiff, matchIdx] = min(abs(bpPkIdces(i) - medPkIdces));
-        if matchDiff < fs * 1.5
+        if matchDiff < fs * 1.5 % consider a match if within 1.5s of each other
             pkMatches(i) = matchIdx;
         end
     end
     
+    % if multiple bandpass peaks got matched to the same median peak, then
+    % only match the median peak to the tallest (greatest magnitude)
+    % bandpass peak
     for i = 1:numel(bpPkIdces)
         if isnan(pkMatches(i))
             continue
@@ -54,13 +65,11 @@ function [bpmEst, relScore, pkIdces] = peakDetectionDouble(unfilteredData, fs)
     
     pkIdces = bpPkIdces(~isnan(pkMatches));
     bpmEst = assignBpmEstimate(pkIdces, fs);
-%     relScore = assignRelScores(pkIdces, filteredData);
 end
 
 function bpmEst = assignBpmEstimate(pkIdces, fs)
-    
-%     bpmEst = 60 / mean(intervals, 'omitnan') * fs;
-
+    % Get respiratory rate estimate using a MAD process, if there are peaks
+    % that are too far or too close together, ignore them
     intervals = diff(pkIdces);
     medInterval = median(intervals);
     madInterval = median(abs(intervals - medInterval));
@@ -69,49 +78,15 @@ function bpmEst = assignBpmEstimate(pkIdces, fs)
     bpmEst = 60 / mean(goodIntervals) * fs;
 end
 
-function relScore = assignRelScores(pkIdces, inputData)
-    relScore = 0;
-    
-    medInterval = round(median(diff(pkIdces)));
-    if mod(medInterval, 2) == 0
-        medInterval = medInterval + 1;
-    end
-    
-    if numel(pkIdces) < 2
-        return
-    end
-    
-    segments = nan(numel(pkIdces), medInterval);
-    halfInterval = (medInterval - 1) / 2;
-    for i = 1:numel(pkIdces)
-        start = pkIdces(i) - halfInterval;
-        stop = pkIdces(i) + halfInterval;
-        if start < 1 || stop > numel(inputData)
-            continue
-        end
-        
-        segments(i,:) = inputData(start:stop);
-    end
-    segments = rmmissing(segments);
-    meanSeg = mean(segments);
-    
-    [numPks, ~] = size(segments);
-    if numPks < 2
-        return
-    end
-    
-    corrs = nan(1, numPks);
-    for i = 1:numPks
-        currCorr = corrcoef(meanSeg, segments(i, :));
-        corrs(i) = currCorr(2, 1);
-    end
-    
-    relScore = mean(corrs);
-end
-
 function [medPks, medPkIdces] = medianFilterPeaks(unfilteredData, fs)
+    % Apply artifact removal process with median filter instead of bandpass
+    % filter
+    % Afterwards, identifies peaks: their magnitudes (medPks) and their
+    % indices (medPkIdces)
+    
     numSamples = numel(unfilteredData);
     
+    % Identify sharp spikes in small 10s windows and interpolate
     miniWin = 10 * fs; % 10s window length
     for winStart = 1:miniWin:numSamples
         winEnd = min(winStart+miniWin-1, numSamples);
@@ -145,6 +120,12 @@ function [medPks, medPkIdces] = medianFilterPeaks(unfilteredData, fs)
         smoothedData = sgolayfilt(newRef, 2, 45); % smoothing
     end
     
+    % Median filter to help further smooth the data and remove high
+    % frequency noise
     medFiltered = medfilt1(smoothedData, fs);
+    
+    % Only keep peaks that are at least 1s apart from each other (expect
+    % respiratory cycles to be a certain length) and have a peak prominence
+    % of at least 10 (avoid small peaks from noise)
     [medPks, medPkIdces] = findpeaks(medFiltered, "MinPeakDistance", min(fs, numel(medFiltered)-2), "MinPeakProminence", 10);
 end

@@ -65,7 +65,6 @@ for id = 1:20
     toc
 end
 
-threshRight = 1;
 for id = 1:20
     fuseRef = allEstimates(id).fuseRef;
     fuseEst = allEstimates(id).fuseEst;
@@ -75,7 +74,7 @@ for id = 1:20
     
     possibleRight = false(1, allEstimates(id).numSegs);
     for i = 1:numEsts
-        possibleRight = possibleRight | (abs(pdSpecEst(i,:) - fuseRef) < threshRight);
+        possibleRight = possibleRight | (abs(pdSpecEst(i,:) - fuseRef) < 1);
     end
     
     allCoverage(id, 1) = sum(~isnan(fuseRef));
@@ -84,7 +83,7 @@ for id = 1:20
     
     allNumSegs(id) = numSegs;
     
-    allNumRight(id, 1) = sum(abs(fuseEst - fuseRef) < threshRight);
+    allNumRight(id, 1) = sum(abs(fuseEst - fuseRef) < 1);
     allNumRight(id, 2) = sum(possibleRight);
 end
 
@@ -100,8 +99,6 @@ if ishandle(fig)
     clf(fig)
 end
 figure(fig)
-
-% blandAltman(allRefEst, allFuseEst, allRelScr)
 
 blandAltman(allFuseRef, allFuseEst)
 title("Respiratory Rate Post Fusion Estimation with MI Sensors")
